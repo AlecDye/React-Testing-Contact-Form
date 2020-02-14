@@ -1,5 +1,5 @@
 import React from "react";
-import { render, fireEvent } from "@testing-library/react";
+import { render, fireEvent, getByPlaceholderText, act } from "@testing-library/react";
 import App from "./App";
 import ContactForm from "./components/ContactForm";
 
@@ -17,8 +17,13 @@ test('firstName, lastName, email, message inputs are rendered', () => {
   getByLabelText(/message/i);
 })
 
-test('form submit sends user data', () => {
-  const { getByLabelText, getByTestId } = render(<ContactForm />);
+/*
+Pass with note:
+  console.error node_modules/react-dom/cjs/react-dom.development.js:530
+    Warning: An update to ContactForm inside a test was not wrapped in act(...).
+*/
+test('form submit sends user data', async () => {
+  const { getByLabelText, getByTestId, waitForElement } = render(<ContactForm />);
 
   const firstNameInput = getByLabelText(/first name/i);
   const lastNameInput = getByLabelText(/last name/i);
@@ -36,6 +41,35 @@ test('form submit sends user data', () => {
   expect(messageInput.value).toBe('Bananas are great');
 
   // no text "submit", button is an input
-  fireEvent.click(getByTestId(/submit button/i));
+  await act(async () => {
+    fireEvent.click(getByTestId(/button/i));
+    // await waitForElement(() => getByTestId(/data-preview/i));
+  })
 
+
+})
+
+test('firstName, lastName, email placeholders are rendering', () => {
+  const { getByLabelText } = render(<ContactForm />);
+  const firstNameInput = getByLabelText(/first name/i);
+  const lastNameInput = getByLabelText(/last name/i);
+  const emailInput = getByLabelText(/email/i);
+  // const messageInput = getByLabelText(/message/i);
+
+  expect(firstNameInput).toHaveAttribute('placeholder')
+  expect(lastNameInput).toHaveAttribute('placeholder')
+  expect(emailInput).toHaveAttribute('placeholder')
+  // expect(messageInput).toHaveAttribute('placeholder')
+})
+test('firstName, lastName, email, message validate', () => {
+  const { getByLabelText } = render(<ContactForm />);
+  const firstNameInput = getByLabelText(/first name/i);
+  const lastNameInput = getByLabelText(/last name/i);
+  const emailInput = getByLabelText(/email/i);
+  const messageInput = getByLabelText(/message/i);
+
+  expect(firstNameInput).toHaveAttribute('type')
+  expect(lastNameInput).toHaveAttribute('type')
+  expect(emailInput).toHaveAttribute('type')
+  expect(messageInput).toHaveAttribute('type')
 })
